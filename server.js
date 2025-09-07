@@ -3,12 +3,7 @@ const cors = require('cors');
 const { pool, testConnection, initializeDatabase } = require('./config/database');
 
 const app = express();
-<<<<<<< Updated upstream
-const PORT = process.env.PORT || 80;
-const HOST = '0.0.0.0';
-=======
-const PORT = 3001;
->>>>>>> Stashed changes
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -17,7 +12,7 @@ app.use(express.static('public'));
 async function startServer() {
   const isConnected = await testConnection();
   if (!isConnected) {
-    console.error('No se pudo conectar a MySQL');
+    console.error('No se pudo conectar a PostgreSQL');
     process.exit(1);
   }
 
@@ -32,8 +27,8 @@ async function startServer() {
 
 app.get('/api/products', async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT * FROM products ORDER BY created_at DESC');
-    res.json(rows);
+    const result = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
+    res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -42,14 +37,14 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await pool.execute('SELECT * FROM products WHERE id = ?', [id]);
+    const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
     
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       res.status(404).json({ error: 'Product not found' });
       return;
     }
     
-    res.json(rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -64,12 +59,12 @@ app.post('/api/products', async (req, res) => {
       return;
     }
 
-    const [result] = await pool.execute(
-      'INSERT INTO products (name, category, quantity, price, description) VALUES (?, ?, ?, ?, ?)',
+    const result = await pool.query(
+      'INSERT INTO products (name, category, quantity, price, description) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [name, category, quantity, price, description]
     );
     
-    res.json({ id: result.insertId, message: 'Product created successfully' });
+    res.json({ id: result.rows[0].id, message: 'Product created successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -80,12 +75,12 @@ app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
     const { name, category, quantity, price, description } = req.body;
     
-    const [result] = await pool.execute(
-      'UPDATE products SET name = ?, category = ?, quantity = ?, price = ?, description = ? WHERE id = ?',
+    const result = await pool.query(
+      'UPDATE products SET name = $1, category = $2, quantity = $3, price = $4, description = $5 WHERE id = $6',
       [name, category, quantity, price, description, id]
     );
     
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       res.status(404).json({ error: 'Product not found' });
       return;
     }
@@ -100,9 +95,9 @@ app.delete('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    const [result] = await pool.execute('DELETE FROM products WHERE id = ?', [id]);
+    const result = await pool.query('DELETE FROM products WHERE id = $1', [id]);
     
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       res.status(404).json({ error: 'Product not found' });
       return;
     }
@@ -115,7 +110,7 @@ app.delete('/api/products/:id', async (req, res) => {
 
 app.get('/api/stats', async (req, res) => {
   try {
-    const [rows] = await pool.execute(`
+    const result = await pool.query(`
       SELECT 
         COUNT(*) as total_products,
         SUM(quantity) as total_items,
@@ -124,7 +119,7 @@ app.get('/api/stats', async (req, res) => {
       FROM products
     `);
     
-    res.json(rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -135,10 +130,3 @@ startServer().then(() => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
   });
 });
-
-<<<<<<< Updated upstream
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}${PORT}`);
-});
-=======
->>>>>>> Stashed changes
