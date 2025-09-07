@@ -1,71 +1,50 @@
-# Inventory App / Práctica Despliegue en AWS. 
+# Inventory App
 
-Aplicación de inventario de productos – proyecto de prueba y despliegue.
+Aplicación de inventario de productos.
 
-------------------------------------------------------------------------
+## Archivos
 
-📂 Contenido del repositorio
+- server.js - Servidor principal
+- package.json - Dependencias
+- public/ - Archivos del frontend
+- config/database.js - Configuración de MySQL
 
--   server.js — Servidor principal implementado en Node.js.
--   package.json & package-lock.json — Gestión de dependencias y
-    scripts.
--   public/ — Archivos estáticos (frontend o assets) servidos por el
-    servidor.
--   node_modules/ — Dependencias instaladas (no versionadas).
--   LICENSE — Licencia MIT.
+## Requisitos
 
-------------------------------------------------------------------------
+- Node.js
+- MySQL
 
-⚙️ Requisitos
+## Instalación
 
--   Node.js (versión 14+ recomendada)
--   npm (gestor de paquetes de Node.js, incluido con Node.js)
--   Git (para clonar el repositorio)
+1. Instalar dependencias:
+   ```
+   npm install
+   ```
 
-------------------------------------------------------------------------
+2. Asegurate de que MySQL esté corriendo
 
-🚀 Instalación y puesta en marcha
+3. Inicializar la base de datos:
+   ```
+   npm run init-db
+   ```
 
-1.  Clonar el repositorio
+4. Ejecutar la aplicación:
+   ```
+   npm start
+   ```
 
-        git clone https://github.com/josecastineiras/inventory.git
-        cd inventory
+## Uso
 
-2.  Instalar dependencias
+La aplicación corre en el puerto 3001.
 
-        npm install
+Para probar:
+```
+curl http://localhost:3001
+```
 
-3.  Iniciar la aplicación
+## Base de datos
 
-    -   En primer plano (mantiene la terminal ocupada):
+Usa MySQL. La configuración está en `config/database.js`.
 
-            npm run start
-
-    -   En segundo plano (útil para servidores o despliegues):
-
-            nohup npm run start > inventory.log 2>&1 &
-
-4.  Verificar que está corriendo
-
-    -   Revisar logs:
-
-            tail -f inventory.log
-
-    -   Verificar proceso activo:
-
-            ps aux | grep node
-
-------------------------------------------------------------------------
-
-🌐 Uso
-
-La aplicación corre en el puerto 3001 por defecto.
-Podés comprobar que está funcionando con:
-
-    curl http://localhost:3001
-
-Si corrés la aplicación en un servidor remoto (ejemplo AWS EC2),
-asegurate de que el Security Group permita tráfico entrante en el puerto
-3001.
-
------------------------------------------------------------------------
+Base de datos: `inventory_db`
+Tabla: `products`
